@@ -27,26 +27,29 @@ import matplotlib.pyplot as plt
 gamma = 3
 mu = 1
 beta = 2
+alpha = 0.5
 
 # R0 = 1
 # gamma = 3
 # mu = 1
 # beta = 4
+# alpha = 0.5
 
 # R0 > 1
 # gamma = 3
 # mu = 1
 # beta = 6
+# alpha = 0.5
 
 delta = mu/(mu + gamma)
 R0 = beta/(mu + gamma)
 print(R0, delta)
 
 eq1 = (1, 0)
-eq2 = (1/R0, delta*(R0-1)/R0)
+eq2 = (1/R0, (alpha+delta)*(R0-1)/(R0*(1+alpha)))
 print("equilibrium", eq1, eq2)
 
-ds_expr = f"{delta}*(1-s) - {R0}*s*i"
+ds_expr = f"{delta}*(1-s) - {R0}*s*i + {alpha} * (1-s-i)"
 di_expr = f"{R0}*s*i - i"
 
 # ============================================================
@@ -61,7 +64,7 @@ trajectory_time = 20
 dt = 0.01
 
 # Initial conditions to trace trajectories
-point_spacing = 0.5
+point_spacing = 0.25
 
 s_points = np.arange(s_min, s_max + point_spacing, point_spacing)
 i_points = np.arange(i_min, i_max + point_spacing, point_spacing)
