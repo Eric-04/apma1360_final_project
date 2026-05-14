@@ -23,48 +23,49 @@ import matplotlib.pyplot as plt
 # ENTER YOUR EQUATIONS HERE
 # ============================================================
 
-# R0 < 1
+# R0 < (delta+phi)/delta
 gamma = 3
 mu = 1
 beta = 2
-alpha = 0.5
+v = 2
 
-# R0 = 1
+# R0 = (delta+phi)/delta
 # gamma = 3
 # mu = 1
-# beta = 4
-# alpha = 0.5
+# beta = 12
+# v = 2
 
-# R0 > 1
+# R0 > (delta+phi)/delta
 # gamma = 3
 # mu = 1
-# beta = 6
-# alpha = 0.5
+# beta = 24
+# v = 2
 
 delta = mu/(mu + gamma)
 R0 = beta/(mu + gamma)
-print(R0, delta)
+phi = v/(mu+gamma)
+print(R0, (delta+phi)/delta)
 
-eq1 = (1, 0)
-eq2 = (1/R0, (alpha+delta)*(R0-1)/(R0*(1+alpha)))
+eq1 = (delta/(delta+phi), 0)
+eq2 = (1/R0, delta - (phi + delta)/R0)
 print("equilibrium", eq1, eq2)
 
-ds_expr = f"{delta}*(1-s) - {R0}*s*i + {alpha} * (1-s-i)"
+ds_expr = f"{delta}*(1-s) - {R0}*s*i -{phi} * s"
 di_expr = f"{R0}*s*i - i"
 
 # ============================================================
 # SETTINGS
 # ============================================================
 
-s_min, s_max = 0, 1.5
-i_min, i_max = -2, 2
+s_min, s_max = 0, 0.8
+i_min, i_max = -1, 1
 
 grid_size = 25
 trajectory_time = 20
 dt = 0.01
 
 # Initial conditions to trace trajectories
-point_spacing = 0.25
+point_spacing = 0.125
 
 s_points = np.arange(s_min, s_max + point_spacing, point_spacing)
 i_points = np.arange(i_min, i_max + point_spacing, point_spacing)
