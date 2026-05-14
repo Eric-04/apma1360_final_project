@@ -22,35 +22,54 @@ import matplotlib.pyplot as plt
 # ============================================================
 # ENTER YOUR EQUATIONS HERE
 # ============================================================
-a = 1
-b = 0.5
 
-ds_expr = f"{a}*(1-s) - {b}*s*i"
-di_expr = f"{b}*s*i - i"
+# R0 < 1
+gamma = 3
+mu = 1
+beta = 2
+
+# R0 = 1
+# gamma = 3
+# mu = 1
+# beta = 4
+
+# R0 > 1
+# gamma = 3
+# mu = 1
+# beta = 6
+
+delta = mu/(mu + gamma)
+R0 = beta/(mu + gamma)
+print(R0, delta)
+
+eq1 = (1, 0)
+eq2 = (1/R0, delta*(R0-1)/R0)
+print("equilibrium", eq1, eq2)
+
+ds_expr = f"{delta}*(1-s) - {R0}*s*i"
+di_expr = f"{R0}*s*i - i"
 
 # ============================================================
 # SETTINGS
 # ============================================================
 
-s_min, s_max = -5, 5
-i_min, i_max = -5, 5
+s_min, s_max = 0, 1.5
+i_min, i_max = -2, 2
 
 grid_size = 25
 trajectory_time = 20
 dt = 0.01
 
 # Initial conditions to trace trajectories
+point_spacing = 0.5
+
+s_points = np.arange(s_min, s_max + point_spacing, point_spacing)
+i_points = np.arange(i_min, i_max + point_spacing, point_spacing)
+
 initial_points = [
-    (4, 2),
-    (-4, 3),
-    (-3, -2),
-    (3, -4),
-    (1, -2),
-    (-1, 4),
-    (2, 1),
-    (-2, -3),
-    (0.5, 3.5),
-    (-4.5, 0.5),
+    (s0, i0)
+    for s0 in s_points
+    for i0 in i_points
 ]
 
 
@@ -114,23 +133,36 @@ def f(s, i):
 def g(s, i):
     return eval(di_expr, {"__builtins__": {}}, {**safe_dict, "s": s, "i": i})
 
-def simulate(s0, i0, tmax, dt):
+def simulate(s0, i0, tmax, dt, bound=100):
     n = int(tmax / dt)
 
-    s_vals = np.zeros(n)
-    i_vals = np.zeros(n)
+    s_vals = [s0]
+    i_vals = [i0]
 
-    s_vals[0] = s0
-    i_vals[0] = i0
+    s = s0
+    i = i0
 
-    for k in range(n - 1):
-        ds = f(s_vals[k], i_vals[k])
-        di = g(s_vals[k], i_vals[k])
+    for _ in range(n - 1):
 
-        s_vals[k + 1] = s_vals[k] + dt * ds
-        i_vals[k + 1] = i_vals[k] + dt * di
+        ds = f(s, i)
+        di = g(s, i)
 
-    return s_vals, i_vals
+        s = s + dt * ds
+        i = i + dt * di
+
+        # Stop if solution blows up
+        if (
+            not np.isfinite(s)
+            or not np.isfinite(i)
+            or abs(s) > bound
+            or abs(i) > bound
+        ):
+            break
+
+        s_vals.append(s)
+        i_vals.append(i)
+
+    return np.array(s_vals), np.array(i_vals)
 
 # Plot trajectories
 for s0, i0 in initial_points:
@@ -142,6 +174,10 @@ for s0, i0 in initial_points:
 # ============================================================
 # LABELS
 # ============================================================
+
+# Plot equilibrium points
+plt.plot(eq1[0], eq1[1], 'ro', markersize=8)
+plt.plot(eq2[0], eq2[1], 'bo', markersize=8)
 
 plt.title("Phase Plane Plot")
 plt.xlabel("s")
